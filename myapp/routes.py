@@ -12,7 +12,7 @@ def index():
 	# List of countries for filter
 	country_codes = [['Germany', 'DEU'],['United Kingdom', 'GBR'],['France', 'FRA'],
 	['Italy', 'ITA'],['Russia', 'RUS'],['Spain', 'ESP'],['Netherlands', 'NLD'],
-	['Turkey', 'TUR'],['Switzerland', 'CHE'],['Sweden', 'SWE']]
+	['Switzerland', 'CHE'], ['Poland', 'POL'], ['Sweden', 'SWE']]
     
 
 	# Parse the POST request countries list

@@ -7,7 +7,7 @@ import requests
 # default list of all countries of interest
 country_default = OrderedDict([('Germany', 'DEU'), ('United Kingdom', 'GBR'), 
   ('France', 'FRA'), ('Italy', 'ITA'), ('Russia', 'RUS'), ('Spain', 'ESP'), 
-  ('Netherlands', 'NLD'), ('Turkey', 'TUR'), ('Switzerland', 'CHE'), ('Sweden', 'SWE')])
+  ('Netherlands', 'NLD'), ('Switzerland', 'CHE'),  ('Poland', 'POL'), ('Sweden', 'SWE')])
 
 
 def return_figures(countries=country_default):
@@ -33,8 +33,14 @@ def return_figures(countries=country_default):
   # https://data.worldbank.org/indicator/NY.GDP.MKTP.KD?end=2019&start=1961&view=chart (GDP by country)
   # https://data.worldbank.org/indicator/TX.VAL.TECH.MF.ZS?view=chart  (Tech exports %)
   # https://data.worldbank.org/indicator/GB.XPD.RSDV.GD.ZS?view=chart (Research and development expenditure (% of GDP))
-  # https://data.worldbank.org/indicator/IP.JRN.ARTC.SC?view=chart
-  indicators = ['NY.GDP.MKTP.KD', 'TX.VAL.TECH.MF.ZS', 'GB.XPD.RSDV.GD.ZS']
+  # https://data.worldbank.org/indicator/IP.JRN.ARTC.SC?view=chart (Scientific and technical journal articles)
+  # https://data.worldbank.org/indicator/IP.PAT.RESD?view=chart (Patent applications, residents)
+  # https://data.worldbank.org/indicator/NE.IMP.GNFS.ZS?view=chart (Imports of goods and services (% of GDP))
+  # https://data.worldbank.org/indicator/EN.ATM.CO2E.PC?view=chart (CO2 emissions (metric tons per capita))
+  # https://data.worldbank.org/indicator/SE.XPD.TOTL.GD.ZS?view=chart (Government expenditure on education, total (% of GDP))
+  # https://data.worldbank.org/indicator/SE.TER.ENRR?view=chart (School enrollment, tertiary (% gross))
+  # https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG?view=chart (GDP growth (annual %))
+  indicators = ['NY.GDP.MKTP.KD', 'TX.VAL.TECH.MF.ZS', 'IP.JRN.ARTC.SC', 'GB.XPD.RSDV.GD.ZS', 'IP.PAT.RESD', 'EN.ATM.CO2E.PC', 'SE.XPD.TOTL.GD.ZS', 'SE.TER.ENRR', 'NY.GDP.MKTP.KD.ZG', 'NE.IMP.GNFS.ZS']
 
 # https://data.worldbank.org/indicator/BX.GSR.ROYL.CD?view=chart
 
@@ -65,7 +71,7 @@ def return_figures(countries=country_default):
   # first chart plots GDP (constant 2010 in US$) from 1990 to 2019 in top 10 economies of Europe
   # as a line chart
   graph_one = []
-  df_one = pd.DataFrame(data_frames[0])
+  df_one = pd.DataFrame(data_frames[8])
 
   # filter and sort values for the visualization
   # filtering plots the countries in decreasing order by their values
@@ -88,32 +94,33 @@ def return_figures(countries=country_default):
           )
       )
 
-  layout_one = dict(title = 'GDP (constant 2010 US$) 1990 to 2018',
+  layout_one = dict(title = 'GDP growth (annual %) <br> from 1990 to 2018',
                 xaxis = dict(title = 'Year',
                   autotick=False, tick0=1990, dtick=28),
-                yaxis = dict(title = 'US$'),
+                yaxis = dict(title = 'Annual growth (%)'),
                 )
 
   # second chart plots High-technology exports (% of manufactured exports) for 2018 as a bar chart
   graph_two = []
-  df_one.sort_values('value', ascending=False, inplace=True)
-  df_one = df_one[df_one['date'] == '2018'] 
+  df_two = pd.DataFrame(data_frames[1])
+  df_two.sort_values('value', ascending=False, inplace=True)
+  df_two = df_two[df_two['date'] == '2018'] 
 
   graph_two.append(
       go.Bar(
-      x = df_one.country.tolist(),
-      y = df_one.value.tolist(),
+      x = df_two.country.tolist(),
+      y = df_two.value.tolist(),
       )
   )
 
-  layout_two = dict(title = 'High-technology exports (% of manufactured exports) in 2018',
+  layout_two = dict(title = 'High-technology exports in 2018 <br> (% manufactured exports)',
                 xaxis = dict(title = 'Country',),
                 yaxis = dict(title = '% of High-technology export'),
                 )
 
-  # third chart plots Research and development expenditure (% of GDP) from 1990 to 2019
+  # third chart plots Patent applications, residents from 1990 to 2019
   graph_three = []
-  df_three = pd.DataFrame(data_frames[1])
+  df_three = pd.DataFrame(data_frames[9])
   df_three = df_three[(df_three['date'] == '2018') | (df_three['date'] == '1990')]
 
   df_three.sort_values('value', ascending=False, inplace=True)
@@ -129,18 +136,18 @@ def return_figures(countries=country_default):
           )
       )
 
-  layout_three = dict(title = 'Research and development expenditure (% of GDP)',
+  layout_three = dict(title = 'Imports of goods and services (% of GDP) <br> from 1990 to 2018',
                 xaxis = dict(title = 'Year',
                   autotick=False, tick0=1990, dtick=28),
-                yaxis = dict(title = 'Percent'),
+                yaxis = dict(title = 'Number of applications'),
                 )
 
   # fourth chart shows Research and development expenditure (% of GDP) vs GDP 
   graph_four = []
-  df_four_a = pd.DataFrame(data_frames[1])
+  df_four_a = pd.DataFrame(data_frames[8])
   df_four_a = df_four_a[['country', 'date', 'value']]
   
-  df_four_b = pd.DataFrame(data_frames[0])
+  df_four_b = pd.DataFrame(data_frames[9])
   df_four_b = df_four_b[['country', 'date', 'value']]
 
   df_four = df_four_a.merge(df_four_b, on=['country', 'date'])
@@ -163,16 +170,16 @@ def return_figures(countries=country_default):
           go.Scatter(
           x = x_val,
           y = y_val,
-          mode = 'lines+markers',
+          mode = 'markers',
           text = text,
           name = country,
           textposition = 'top'
           )
       )
 
-  layout_four = dict(title = 'Research and development expenditure (% of GDP) vs GDP',
-                xaxis = dict(title = '% Research and development expenditure', range=[0,100], dtick=10),
-                yaxis = dict(title = 'GDP', dtick=10),
+  layout_four = dict(title = 'GDP growth vs Imports of goods and services',
+                xaxis = dict(title = 'Annual GDP growth (%)', dtick=5),
+                yaxis = dict(title = 'Imports of goods and services (%)', dtick=10),
                 )
 
 
